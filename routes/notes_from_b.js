@@ -11,16 +11,25 @@ const client = new MongoClient(uri);
 // corsミドルウェアを使用
 router.use(cors());
 
+// ★ MongoDB に接続
+async function connectDB() {
+    if (!client.topology || !client.topology.isConnected()) {
+        await client.connect();
+    }
+}
+
 router.get('/', async (req, res) => {
-// データベース、コレクションを指定
-const database = client.db('notes');
-const notes = database.collection('notes');
 
+    await connectDB(); // ★ 接続する
 
-// 全てのドキュメントを取得
-const note = await notes.find({}).toArray();
+    // データベース、コレクションを指定
+    const database = client.db('notes');
+    const notes = database.collection('notes');
 
-res.json(note);
-})
+    // 全てのドキュメントを取得
+    const note = await notes.find({}).toArray();
+
+    res.json(note);
+});
 
 module.exports = router;
